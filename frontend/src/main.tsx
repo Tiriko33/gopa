@@ -18,12 +18,27 @@ import { Kochmodus } from "./pages/Kochmodus";
 import { Einkauf } from "./pages/Einkauf";
 import { Bearbeiten } from "./pages/Bearbeiten";
 import { registerSW } from "virtual:pwa-register";
+import { useEffect, useState, type ReactNode } from "react";
+import { AUTH_EVENT, getToken } from "./lib/auth";
+import { Login } from "./pages/Login";
 
 registerSW({ immediate: true });
+
+/** Zeigt die Anmeldung, solange kein Token da ist. Die Adresse bleibt erhalten (wichtig für Teilen-Links). */
+function AuthGate({ children }: { children: ReactNode }) {
+  const [token, setTok] = useState(getToken());
+  useEffect(() => {
+    const h = () => setTok(getToken());
+    window.addEventListener(AUTH_EVENT, h);
+    return () => window.removeEventListener(AUTH_EVENT, h);
+  }, []);
+  return token ? <>{children}</> : <Shell nav={false}><Login /></Shell>;
+}
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
+      <AuthGate>
       <Routes>
         <Route path="/" element={<Shell><Sammlung /></Shell>} />
         <Route path="/rezept/:id" element={<Shell nav={false}><Rezeptansicht /></Shell>} />
@@ -33,6 +48,7 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/einkauf" element={<Shell><Einkauf /></Shell>} />
         <Route path="*" element={<Shell><NichtGefunden /></Shell>} />
       </Routes>
+      </AuthGate>
     </BrowserRouter>
   </StrictMode>,
 );

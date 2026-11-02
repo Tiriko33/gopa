@@ -17,6 +17,12 @@ export default defineConfig({
         display: "standalone",
         background_color: "#E6F0FF",
         theme_color: "#1B63CC",
+        // Web Share Target: "Teilen" in Instagram/TikTok -> Gopa auswählen -> /neu?url=...&text=...
+        share_target: {
+          action: "/neu",
+          method: "GET",
+          params: { title: "title", text: "text", url: "url" },
+        },
         icons: [
           { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
           { src: "/icon-512.png", sizes: "512x512", type: "image/png" },

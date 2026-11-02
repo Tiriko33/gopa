@@ -1,13 +1,13 @@
 services:
-  backend:
-    build: ./backend
+  gopa:
+    build: .
     env_file: .env
-    environment:
-      DATA_DIR: /data
     volumes:
-      - gopa-data:/data
+      - gopa-data:/data          # SQLite-Datenbank und Whisper-Modell-Cache
+    environment:
+      HF_HOME: /data/hf          # faster-whisper lädt sein Modell einmalig hierhin
     ports:
-      - "127.0.0.1:8000:8000"   # Reverse Proxy (HTTPS) davor schalten
+      - "127.0.0.1:8000:8000"    # nur lokal erreichbar: HTTPS-Reverse-Proxy davorschalten
     restart: unless-stopped
 
 volumes:
