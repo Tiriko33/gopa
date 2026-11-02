@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Gopa Einkaufsliste</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif}
+a{text-decoration:none;color:inherit}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #E6F0FF; color: #0B2A4A; display: flex; flex-direction: column; position: relative; overflow: hidden; font-family: 'Nunito', system-ui, sans-serif">
+
+<svg aria-hidden="true" width="40" height="34" viewBox="0 0 40 34" style="position: absolute; left: 322px; top: 600px; transform: rotate(16deg)"><g fill="#C4D9F7"><ellipse cx="20" cy="26" rx="10" ry="8"></ellipse><circle cx="8" cy="14" r="4.5"></circle><circle cx="16" cy="8" r="4.5"></circle><circle cx="25" cy="8" r="4.5"></circle><circle cx="32" cy="14" r="4.5"></circle></g></svg>
+
+<div style="padding: 28px 20px 8px 20px; display: flex; align-items: center; gap: 12px; position: relative">
+<svg role="img" aria-label="Gopa mit Einkaufsliste" width="72" height="72" viewBox="0 0 120 120" style="flex: none">
+<circle cx="24" cy="42" r="15" fill="#A9683F"></circle><circle cx="96" cy="42" r="15" fill="#A9683F"></circle>
+<circle cx="24" cy="42" r="8" fill="#E8B089"></circle><circle cx="96" cy="42" r="8" fill="#E8B089"></circle>
+<ellipse cx="60" cy="72" rx="44" ry="40" fill="#B97A4B"></ellipse>
+<ellipse cx="60" cy="84" rx="20" ry="15" fill="#FBE6C8"></ellipse>
+<ellipse cx="60" cy="77" rx="6" ry="4.5" fill="#4A2E1F"></ellipse>
+<path d="M60 81v5M53 88q7 6 14 0" stroke="#4A2E1F" stroke-width="2" fill="none" stroke-linecap="round"></path>
+<circle cx="43" cy="66" r="4.8" fill="#2A1A12"></circle><circle cx="77" cy="66" r="4.8" fill="#2A1A12"></circle>
+<circle cx="44.6" cy="64.4" r="1.7" fill="#FFFFFF"></circle><circle cx="78.6" cy="64.4" r="1.7" fill="#FFFFFF"></circle>
+<ellipse cx="33" cy="80" rx="7" ry="4.5" fill="#FF9DA8" opacity="0.75"></ellipse><ellipse cx="87" cy="80" rx="7" ry="4.5" fill="#FF9DA8" opacity="0.75"></ellipse>
+<circle cx="42" cy="26" r="13" fill="#FFFFFF" stroke="#D3E2FA" stroke-width="2"></circle><circle cx="60" cy="20" r="15" fill="#FFFFFF" stroke="#D3E2FA" stroke-width="2"></circle><circle cx="78" cy="26" r="13" fill="#FFFFFF" stroke="#D3E2FA" stroke-width="2"></circle>
+<rect x="34" y="30" width="52" height="12" rx="5" fill="#2F6FE0"></rect>
+</svg>
+<div style="flex: 1; display: flex; flex-direction: column; gap: 2px">
+<h1 style="margin: 0; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 30px; font-weight: 800; line-height: 1.05; color: #1B63CC">Einkaufsliste</h1>
+<span style="font-size: 14px; font-weight: 700; color: #7A4A28">Noch 6 Dinge im Korb</span>
+</div>
+</div>
+
+<div style="padding: 4px 20px 10px 20px; display: flex; justify-content: flex-end; position: relative">
+<button style="height: 44px; padding: 0 16px; border-radius: 999px; border: 2px solid #C4D9F7; background: #FFFFFF; color: #1B63CC; font-size: 13px; font-weight: 800; cursor: pointer">Erledigte löschen</button>
+</div>
+
+<div style="flex: 1; min-height: 0; overflow: hidden; padding: 0 20px; display: flex; flex-direction: column; gap: 10px; position: relative">
+
+<span style="font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 17px; font-weight: 700; color: #5A3A22">Cremige Tomatenpasta</span>
+<div style="background: #FFF8EC; border: 2px solid #F0DDB8; border-radius: 22px; padding: 2px 16px; display: flex; flex-direction: column">
+<div style="display: flex; align-items: center; gap: 14px; min-height: 52px; border-bottom: 1.5px dashed #EBD3A6">
+<div style="width: 28px; height: 28px; flex: none; border-radius: 10px; background: #F6B74A; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3B2412" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg></div>
+<span style="flex: 1; font-size: 15px; font-weight: 700; color: #7A6650; text-decoration: line-through">Pasta</span>
+<span style="font-size: 15px; font-weight: 800; color: #7A6650">250 g</span>
+</div>
+<div style="display: flex; align-items: center; gap: 14px; min-height: 52px; border-bottom: 1.5px dashed #EBD3A6">
+<div style="width: 28px; height: 28px; flex: none; border-radius: 10px; border: 2px solid #C9A56B; box-sizing: border-box; background: #FFFFFF"></div>
+<span style="flex: 1; font-size: 15px; font-weight: 700">Passierte Tomaten</span>
+<span style="font-size: 15px; font-weight: 800; color: #12448F">400 g</span>
+</div>
+<div style="display: flex; align-items: center; gap: 14px; min-height: 52px; border-bottom: 1.5px dashed #EBD3A6">
+<div style="width: 28px; height: 28px; flex: none; border-radius: 10px; border: 2px solid #C9A56B; box-sizing: border-box; background: #FFFFFF"></div>
+<span style="flex: 1; font-size: 15px; font-weight: 700">Sahne</span>
+<span style="font-size: 15px; font-weight: 800; color: #12448F">100 ml</span>
+</div>
+<div style="display: flex; align-items: center; gap: 14px; min-height: 52px">
+<div style="width: 28px; height: 28px; flex: none; border-radius: 10px; border: 2px solid #C9A56B; box-sizing: border-box; background: #FFFFFF"></div>
+<span style="flex: 1; font-size: 15px; font-weight: 700">Parmesan</span>
+<span style="font-size: 15px; font-weight: 800; color: #12448F">40 g</span>
+</div>
+</div>
+
+<span style="font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 17px; font-weight: 700; color: #5A3A22; margin-top: 4px">Overnight Oats mit Beeren</span>
+<div style="background: #FFF8EC; border: 2px solid #F0DDB8; border-radius: 22px; padding: 2px 16px; display: flex; flex-direction: column">
+<div style="display: flex; align-items: center; gap: 14px; min-height: 52px; border-bottom: 1.5px dashed #EBD3A6">
+<div style="width: 28px; height: 28px; flex: none; border-radius: 10px; border: 2px solid #C9A56B; box-sizing: border-box; background: #FFFFFF"></div>
+<span style="flex: 1; font-size: 15px; font-weight: 700">Haferflocken</span>
+<span style="font-size: 15px; font-weight: 800; color: #12448F">80 g</span>
+</div>
+<div style="display: flex; align-items: center; gap: 14px; min-height: 52px">
+<div style="width: 28px; height: 28px; flex: none; border-radius: 10px; border: 2px solid #C9A56B; box-sizing: border-box; background: #FFFFFF"></div>
+<span style="flex: 1; font-size: 15px; font-weight: 700">Beeren</span>
+<span style="font-size: 15px; font-weight: 800; color: #12448F">150 g</span>
+</div>
+</div>
+
+</div>
+
+<div style="height: 78px; flex: none; background: #FFF8EC; border-top: 2px solid #F0DDB8; border-radius: 28px 28px 0 0; display: flex; align-items: center; justify-content: space-around; padding: 0 24px; position: relative">
+<a href="Gopa-Start.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 64px; min-height: 48px; justify-content: center; color: #3F5A7D; font-size: 12px; font-weight: 800">
+<svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3F5A7D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2z"></path><path d="M8 7h6"></path></svg>
+<span>Rezepte</span>
+</a>
+<a href="Gopa-Hinzufuegen.dc.html" aria-label="Rezept per Link hinzufügen" style="width: 62px; height: 62px; margin-top: -34px; border-radius: 50%; background: #F6B74A; display: flex; align-items: center; justify-content: center; border: 4px solid #E6F0FF">
+<svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3B2412" stroke-width="2.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+</a>
+<a href="Gopa-Einkauf.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 64px; min-height: 48px; justify-content: center; color: #1B63CC; font-size: 12px; font-weight: 800">
+<svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1B63CC" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14l-1.2 11a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"></path><path d="M9 7a3 3 0 0 1 6 0"></path></svg>
+<span>Einkauf</span>
+</a>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>
