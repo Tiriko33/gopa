@@ -10,3 +10,5 @@ node_modules/
 dist/
 tmp/
 *.log
+frontend/dev-dist/
+backend/.devdata/
