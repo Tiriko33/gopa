@@ -1,0 +1,14 @@
+services:
+  backend:
+    build: ./backend
+    env_file: .env
+    environment:
+      DATA_DIR: /data
+    volumes:
+      - gopa-data:/data
+    ports:
+      - "127.0.0.1:8000:8000"   # Reverse Proxy (HTTPS) davor schalten
+    restart: unless-stopped
+
+volumes:
+  gopa-data:
