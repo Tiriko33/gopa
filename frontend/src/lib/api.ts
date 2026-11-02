@@ -1,5 +1,13 @@
 import type { Kategorie, Rezept } from "./types";
 
+export interface Job {
+  id: string;
+  status: "running" | "done" | "error";
+  step: "download" | "transcribe" | "translate";
+  result: Omit<Rezept, "id" | "erstellt_am" | "favorit"> | null;
+  error: { code: string; message: string; fallback: boolean } | null;
+}
+
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
     super(message);
@@ -40,5 +48,16 @@ export const api = {
   getRecipe: (id: string) => request<Rezept>(`/api/recipes/${id}`),
   setKategorie: (id: string, kategorie: Kategorie) =>
     request<Rezept>(`/api/recipes/${id}`, json("PATCH", { kategorie })),
+  updateRecipe: (id: string, r: Omit<Rezept, "id" | "erstellt_am" | "favorit">) =>
+    request<Rezept>(`/api/recipes/${id}`, json("PUT", r)),
+  saveRecipe: (r: Omit<Rezept, "id" | "erstellt_am" | "favorit">) => request<Rezept>("/api/recipes", json("POST", r)),
+  startJob: (link: string, text: string, files: File[]) => {
+    const f = new FormData();
+    f.set("link", link);
+    f.set("text", text);
+    files.forEach((x) => f.append("files", x));
+    return request<{ id: string }>("/api/jobs", { method: "POST", body: f });
+  },
+  getJob: (id: string) => request<Job>(`/api/jobs/${id}`),
   deleteRecipe: (id: string) => request<void>(`/api/recipes/${id}`, { method: "DELETE" }),
 };
