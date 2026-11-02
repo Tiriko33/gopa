@@ -1,0 +1,86 @@
+/* Animationen: nur transform/opacity (GPU-beschleunigt, ruckelfrei). Bei "Weniger Bewegung" alles aus. */
+:root {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes page-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes card-in { from { opacity: 0; transform: translateY(18px) scale(0.97); } to { opacity: 1; transform: none; } }
+@keyframes pop-in { 0% { opacity: 0; transform: scale(0.6); } 70% { transform: scale(1.06); } 100% { opacity: 1; transform: none; } }
+@keyframes step-in { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
+@keyframes bob { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-3px) rotate(-1.5deg); } }
+@keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+@keyframes hat-wobble { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-3deg); } 75% { transform: rotate(3deg); } }
+@keyframes stir { 0%, 100% { transform: translateX(-4px) rotate(-5deg); } 50% { transform: translateX(4px) rotate(5deg); } }
+@keyframes spoon { 0%, 100% { transform: rotate(-10deg); } 50% { transform: rotate(14deg); } }
+@keyframes steam-rise { 0% { opacity: 0; transform: translateY(0) scale(0.5); } 25% { opacity: 0.9; } 100% { opacity: 0; transform: translateY(-48px) scale(1.5); } }
+@keyframes shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+@keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(246, 183, 74, 0.55); } 100% { box-shadow: 0 0 0 16px rgba(246, 183, 74, 0); } }
+@keyframes shake { 0%, 100% { transform: none; } 20% { transform: rotate(-3deg); } 40% { transform: rotate(3deg); } 60% { transform: rotate(-2deg); } 80% { transform: rotate(2deg); } }
+@keyframes draw { from { stroke-dashoffset: 24; } to { stroke-dashoffset: 0; } }
+@keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.18); color: var(--gopa-blau); } 100% { transform: scale(1); } }
+@keyframes bar-stripes { from { background-position: 0 0; } to { background-position: 28px 0; } }
+
+/* Seitenübergang */
+.shell-body, .cook { animation: page-in 0.38s var(--ease-out) both; }
+
+/* Bär */
+.bear { transform-origin: 50% 90%; }
+.bear-idle { animation: bob 4.5s ease-in-out infinite; }
+.bear-eyes { transform-box: fill-box; transform-origin: center; animation: blink 5.5s infinite; }
+.bear-cook { animation: stir 0.7s ease-in-out infinite; }
+.bear-cook .bear-hat { transform-box: fill-box; transform-origin: 50% 100%; animation: hat-wobble 0.7s ease-in-out infinite; }
+
+/* Ladeanimation */
+.loader { position: relative; height: 128px; display: flex; justify-content: center; align-items: flex-end; margin-bottom: -4px; }
+.loader-bear { position: absolute; bottom: 34px; }
+.pot { position: relative; z-index: 1; overflow: visible; }
+.pot-spoon { transform-box: fill-box; transform-origin: 0% 100%; animation: spoon 0.7s ease-in-out infinite; }
+.steam { position: absolute; left: 50%; bottom: 80px; width: 150px; height: 40px; transform: translateX(-50%); }
+.steam i { position: absolute; bottom: 0; width: 12px; height: 12px; border-radius: 50%; background: var(--himmelblau-rahmen); opacity: 0; animation: steam-rise 2.1s ease-out infinite; }
+
+/* Fortschrittsbalken: fließende Streifen */
+.bar div { background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.28) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.28) 50%, rgba(255, 255, 255, 0.28) 75%, transparent 75%); background-size: 28px 28px; animation: bar-stripes 0.8s linear infinite; transition: width 0.6s var(--ease-out); }
+.progress-card { animation: pop-in 0.45s var(--ease-spring) both; }
+.dot.active { animation: pulse-ring 1.4s ease-out infinite; }
+.dot.done { animation: pop-in 0.35s var(--ease-spring) both; }
+.dot.done svg path, .box svg path { stroke-dasharray: 24; animation: draw 0.35s var(--ease-out) 0.05s both; }
+
+/* Listen */
+.recipe-card { animation: card-in 0.5s var(--ease-out) both; animation-delay: calc(var(--i, 0) * 60ms); transition: transform 0.2s var(--ease-out), box-shadow 0.2s; }
+.recipe-card:active { transform: scale(0.97); }
+.skeleton { position: relative; overflow: hidden; height: 108px; background: var(--creme); border: 2px solid var(--creme-rahmen); border-radius: 24px; }
+.skeleton::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent); animation: shimmer 1.3s infinite; }
+.bear-says { animation: pop-in 0.5s var(--ease-spring) both; }
+.shop-card li, .ingredients li, .steps li { animation: card-in 0.45s var(--ease-out) both; animation-delay: calc(var(--i, 0) * 40ms); }
+
+/* Eingaben, Buttons */
+.btn, .chip, .paste-btn, .clear-btn, .round-btn, .nav-plus, .nav-item, .stepper button, .cook-next, .cook-back, .timer-pill, .icon-del {
+  transition: transform 0.2s var(--ease-spring), background-color 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s;
+}
+.btn:active, .chip:active, .paste-btn:active, .clear-btn:active, .round-btn:active, .stepper button:active, .cook-next:active,
+.cook-back:active, .timer-pill:active, .icon-del:active { transform: scale(0.94); }
+.nav-plus:active { transform: scale(0.88) rotate(90deg); }
+.nav-plus { box-shadow: 0 6px 16px rgba(246, 183, 74, 0.5); }
+.chip.active { animation: pop-in 0.3s var(--ease-spring) both; }
+.search { transition: border-color 0.2s, box-shadow 0.2s; }
+.search:focus-within { box-shadow: 0 0 0 4px rgba(27, 99, 204, 0.15); }
+
+/* Portionsrechner und Einkaufsliste */
+.ing-amount.bump { display: inline-block; animation: bump 0.35s var(--ease-spring); }
+.box { transition: background-color 0.2s, border-color 0.2s, transform 0.2s var(--ease-spring); }
+.shop-row.done .box { animation: pop-in 0.35s var(--ease-spring); }
+.shop-name { transition: color 0.25s; position: relative; }
+
+/* Kochmodus */
+.cook-text.step-in { animation: step-in 0.4s var(--ease-out) both; }
+.step-forward .cook-text.step-in { animation-name: step-in; }
+.seg { transition: background-color 0.4s var(--ease-out), transform 0.4s var(--ease-spring); }
+.seg.on { transform: scaleY(1.25); }
+.timer-pill.running .timer-icon { animation: pulse-ring 1.2s ease-out infinite; }
+.timer-pill.done { animation: shake 0.6s ease-in-out 3; }
+.cook-bubble { animation: pop-in 0.45s var(--ease-spring) both; transform-origin: 0% 100%; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

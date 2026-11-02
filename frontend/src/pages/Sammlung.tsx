@@ -43,6 +43,9 @@ export function Sammlung() {
             Was kochen wir heute?{rezepte && ` · ${count} ${count === 1 ? "Rezept" : "Rezepte"}`}
           </span>
         </div>
+        <Link to="/einstellungen" className="round-btn bordered" aria-label="Einstellungen">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B2A4A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" /></svg>
+        </Link>
       </header>
 
       <div className="search-wrap">
@@ -72,16 +75,17 @@ export function Sammlung() {
         {!fehler && rezepte && !leer && rezepte.length === 0 && (
           <BearSays role="status">Dazu finde ich nichts. Probier ein anderes Wort oder eine andere Kategorie.</BearSays>
         )}
-        {!fehler && rezepte?.map((r) => <Karte key={r.id} r={r} />)}
+        {!fehler && !rezepte && [0, 1, 2].map((i) => <div key={i} className="skeleton" aria-hidden="true" />)}
+        {!fehler && rezepte?.map((r, i) => <Karte key={r.id} r={r} i={i} />)}
       </main>
     </>
   );
 }
 
-function Karte({ r }: { r: Rezept }) {
+function Karte({ r, i }: { r: Rezept; i: number }) {
   const zeit = formatTime(r);
   return (
-    <Link to={`/rezept/${r.id}`} className="card recipe-card">
+    <Link to={`/rezept/${r.id}`} className="card recipe-card" style={{ "--i": Math.min(i, 8) } as React.CSSProperties}>
       <div className="thumb"><Paw size={40} fill="#B97A4B" /></div>
       <div className="card-text">
         <span className="card-title">{r.titel}</span>

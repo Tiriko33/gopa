@@ -32,8 +32,8 @@ export function Einkauf() {
               <section key={g.titel} aria-label={g.titel}>
                 <h2 className="shop-group">{g.titel}</h2>
                 <ul className="shop-card">
-                  {g.items.map((e) => (
-                    <li key={e.key}>
+                  {g.items.map((e, i) => (
+                    <li key={e.key} style={{ "--i": i } as React.CSSProperties}>
                       <label className={e.erledigt ? "shop-row done" : "shop-row"}>
                         <input type="checkbox" checked={e.erledigt} onChange={() => update((l) => toggle(l, e.key))} />
                         <span className="box" aria-hidden="true">
