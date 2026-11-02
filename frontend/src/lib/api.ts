@@ -1,4 +1,6 @@
 import { getToken, setToken } from "./auth";
+import { filterRecipes } from "./filter";
+import { getServer } from "./server";
 import type { Kategorie, Rezept } from "./types";
 
 export interface Job {
@@ -21,9 +23,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const headers = new Headers(init?.headers);
   if (token) headers.set("Authorization", `Bearer ${token}`);
   try {
-    res = await fetch(path, { ...init, headers });
+    res = await fetch(getServer() + path, { ...init, headers });
   } catch {
-    throw new ApiError(0, "Gopa erreicht den Server nicht. Prüfe deine Internetverbindung.");
+    throw new ApiError(0, "Gopa erreicht den Server nicht. Läuft Gopas Küche auf dem PC, und stimmt die Adresse in den Einstellungen?");
   }
   if (res.status === 401 && path !== "/api/login") setToken(null); // Token ungültig: zurück zum Login
   if (!res.ok) {
@@ -43,15 +45,44 @@ const json = (method: string, body: unknown): RequestInit => ({
   body: JSON.stringify(body),
 });
 
+// Zuletzt geladene Rezepte merkt sich die App, damit Lesen und Kochen auch ohne den PC klappen.
+const CACHE = "gopa-cache";
+type Cache = { list?: Rezept[]; byId: Record<string, Rezept> };
+function readCache(): Cache {
+  try { return { byId: {}, ...(JSON.parse(localStorage.getItem(CACHE) ?? "{}") as Partial<Cache>) }; } catch { return { byId: {} }; }
+}
+function writeCache(fn: (c: Cache) => void) {
+  try { const c = readCache(); fn(c); localStorage.setItem(CACHE, JSON.stringify(c)); } catch { /* voll oder gesperrt */ }
+}
+const offline = (e: unknown) => e instanceof ApiError && e.status === 0;
+
 export const api = {
   login: (password: string) => request<{ token: string }>("/api/login", json("POST", { password })),
   listRecipes: (kategorie: string, q: string) => {
     const p = new URLSearchParams();
     if (kategorie !== "Alle") p.set("kategorie", kategorie);
     if (q.trim()) p.set("q", q.trim());
-    return request<Rezept[]>(`/api/recipes?${p}`);
+    return request<Rezept[]>(`/api/recipes?${p}`).then(
+      (list) => {
+        if (kategorie === "Alle" && !q.trim()) writeCache((c) => { c.list = list; list.forEach((r) => { c.byId[r.id] = r; }); });
+        return list;
+      },
+      (e) => {
+        const cached = readCache().list;
+        if (offline(e) && cached) return filterRecipes(cached, kategorie, q);
+        throw e;
+      },
+    );
   },
-  getRecipe: (id: string) => request<Rezept>(`/api/recipes/${id}`),
+  getRecipe: (id: string) =>
+    request<Rezept>(`/api/recipes/${id}`).then(
+      (r) => { writeCache((c) => { c.byId[id] = r; }); return r; },
+      (e) => {
+        const cached = readCache().byId[id];
+        if (offline(e) && cached) return cached;
+        throw e;
+      },
+    ),
   setKategorie: (id: string, kategorie: Kategorie) =>
     request<Rezept>(`/api/recipes/${id}`, json("PATCH", { kategorie })),
   updateRecipe: (id: string, r: Omit<Rezept, "id" | "erstellt_am" | "favorit">) =>

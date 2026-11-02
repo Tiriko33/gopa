@@ -30,6 +30,7 @@ class Settings:
     ollama_url: str = "http://localhost:11434"
     ollama_model: str = ""
     ollama_timeout: int = 300
+    ollama_keep_alive: str = "0"  # "0" = Modell sofort nach dem Rezept entladen (gibt RAM/VRAM frei)
 
 
 def load_settings() -> Settings:
@@ -52,4 +53,5 @@ def load_settings() -> Settings:
         ollama_url=os.environ.get("OLLAMA_URL", "http://localhost:11434").rstrip("/"),
         ollama_model=os.environ.get("OLLAMA_MODEL", ""),
         ollama_timeout=_int("OLLAMA_TIMEOUT", 300),
+        ollama_keep_alive=os.environ.get("OLLAMA_KEEP_ALIVE", "0").strip(),
     )

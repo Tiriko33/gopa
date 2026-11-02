@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1B63CC">
+<title>Gopa – Rezepte aus Kochvideos</title>
+<link rel="icon" href="icon-192.png">
+<style>
+  :root { --blau:#1B63CC; --himmel:#E6F0FF; --creme:#FFF8EC; --rahmen:#F0DDB8; --honig:#F6B74A; --honig-text:#3B2412; --text:#0B2A4A; --braun:#5A3A22; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--himmel); color: var(--text); font-family: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif; line-height: 1.55; }
+  main { max-width: 720px; margin: 0 auto; padding: 24px 20px 64px; }
+  h1, h2 { font-family: "Baloo 2", "Nunito", system-ui, sans-serif; line-height: 1.1; margin: 0; }
+  h1 { font-size: clamp(34px, 8vw, 48px); color: var(--blau); font-weight: 800; }
+  h2 { font-size: 26px; margin-bottom: 12px; }
+  .hero { display: flex; align-items: center; gap: 20px; padding: 24px 0 8px; }
+  .hero img { width: 120px; height: 120px; flex: none; animation: bob 4.5s ease-in-out infinite; }
+  .hero p { margin: 8px 0 0; font-size: 18px; font-weight: 700; color: #7A4A28; }
+  .card { background: var(--creme); border: 2px solid var(--rahmen); border-radius: 24px; padding: 20px; margin-top: 20px; }
+  .download { display: flex; justify-content: center; margin-top: 24px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 58px; padding: 0 32px; border-radius: 999px; background: var(--honig); color: var(--honig-text); font-weight: 800; font-size: 18px; text-decoration: none; box-shadow: 0 8px 20px rgba(246,183,74,.45); transition: transform .2s cubic-bezier(.34,1.56,.64,1); }
+  .btn:hover { transform: translateY(-2px) scale(1.03); } .btn:active { transform: scale(.95); }
+  .small { font-size: 14px; color: #3F5A7D; text-align: center; margin-top: 10px; }
+  ol, ul { padding-left: 22px; margin: 8px 0 0; } li { margin: 6px 0; }
+  code { background: #fff; border: 1px solid var(--rahmen); border-radius: 8px; padding: 1px 6px; font-size: .92em; }
+  a { color: var(--blau); font-weight: 700; }
+  .steps li::marker { color: var(--blau); font-weight: 800; }
+  @keyframes bob { 0%,100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-5px) rotate(-2deg); } }
+  @keyframes rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  .card { animation: rise .6s ease-out both; } .card:nth-of-type(2) { animation-delay: .08s; } .card:nth-of-type(3) { animation-delay: .16s; } .card:nth-of-type(4) { animation-delay: .24s; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  @media (max-width: 480px) { .hero { flex-direction: column; text-align: center; } }
+</style>
+</head>
+<body>
+<main>
+  <header class="hero">
+    <img src="gopa-bear.svg" alt="Gopa, der Bär mit Kochmütze">
+    <div>
+      <h1>Gopa</h1>
+      <p>Aus Kochvideos werden deutsche Rezepte. Teilen, speichern, kochen.</p>
+    </div>
+  </header>
+
+  <div class="download">
+    <a class="btn" href="gopa.apk" download>Gopa für Android herunterladen</a>
+  </div>
+  <p class="small">Android-App (APK) für private Tests · Version 1.0 · nicht aus dem Play Store</p>
+
+  <section class="card">
+    <h2>Was ist Gopa?</h2>
+    <p>Gopa liest Kochvideos von <strong>TikTok</strong> und <strong>Instagram</strong> und schreibt daraus ein Rezept auf Deutsch: mit Zutatenliste, Schritten, Timern und umgerechneten Mengen (Cups und Unzen werden zu Gramm und Milliliter). Den Link zum Original-Video behält Gopa bei jedem Rezept.</p>
+    <ul>
+      <li>Rezepte speichern, bearbeiten, nach Kategorie filtern und durchsuchen</li>
+      <li>Portionsrechner, der alle Mengen mitrechnet</li>
+      <li>Kochmodus: ein Schritt pro Bildschirm, Timer, Display bleibt an</li>
+      <li>Einkaufsliste, die gleiche Zutaten zusammenzählt</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2>So installierst du die App</h2>
+    <ol class="steps">
+      <li>Oben auf <strong>Gopa für Android herunterladen</strong> tippen.</li>
+      <li>Die Datei <code>gopa.apk</code> öffnen. Android fragt, ob dieser Quelle die Installation erlaubt sein soll: erlauben (nur für Chrome bzw. deinen Browser).</li>
+      <li><strong>Installieren</strong> tippen. Falls Play Protect warnt, weil die App nicht aus dem Play Store kommt: <em>Trotzdem installieren</em>.</li>
+      <li>Gopa öffnen. Beim ersten Start trägst du die Adresse von <strong>Gopas Küche</strong> (dem Rechner, der die Rezepte erstellt) und das Passwort ein.</li>
+    </ol>
+  </section>
+
+  <section class="card">
+    <h2>So benutzt du sie</h2>
+    <ol class="steps">
+      <li>In TikTok oder Instagram beim Video auf <strong>Teilen</strong> tippen und <strong>Gopa</strong> wählen. Der Link steht dann schon in der App.</li>
+      <li>Optional eine Kategorie wählen, dann <strong>Rezept erstellen</strong>. Gopa lädt Beschreibung und Video, hört zu und schreibt das Rezept auf. Das dauert ein bis drei Minuten.</li>
+      <li>Im Rezept <strong>Zur Einkaufsliste</strong> oder <strong>Los geht's!</strong> für den Kochmodus tippen.</li>
+      <li>Klappt ein Link nicht (bei Instagram kommt das vor), nimm <em>Klappt nicht? Text oder Screenshot hinzufügen</em>.</li>
+    </ol>
+  </section>
+
+  <section class="card">
+    <h2>Gopas Küche</h2>
+    <p>Die App selbst ist nur die Oberfläche. Das Erkennen übernimmt ein Programm auf einem PC (<strong>Gopas Küche</strong>), das mit einem lokalen KI-Modell (Ollama) arbeitet. Es braucht keinen Server rund um die Uhr: Der PC muss nur laufen, während ein Rezept erstellt wird. Danach gibt das Modell seinen Speicher sofort wieder frei, damit dein PC nicht langsamer wird.</p>
+    <p>Einrichtung, Fehlerhilfe und mehr stehen im <a href="https://gitlab.com/DEIN-NAME/gopa/-/wikis/home">Wiki des Projekts</a>.</p>
+  </section>
+
+  <p class="small">Gopa ist ein privates Geschenkprojekt. Rezepte stammen aus fremden Videos: Rechte bleiben bei den Urhebern, den Link zum Original zeigt Gopa immer an.</p>
+</main>
+</body>
+</html>

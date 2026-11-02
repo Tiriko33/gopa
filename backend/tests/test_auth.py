@@ -53,3 +53,12 @@ def test_static_frontend_and_spa_fallback(tmp_path):
     assert c.get("/api/unbekannt").status_code in (401, 404)  # kein HTML für API-Pfade
     assert c.get("/../../etc/passwd").status_code in (200, 404)
     assert "root:" not in c.get("/..%2f..%2fetc/passwd").text
+
+
+def test_cors_allows_the_android_app_origin(tmp_path):
+    c = client(tmp_path)
+    r = c.options("/api/login", headers={"Origin": "http://localhost", "Access-Control-Request-Method": "POST",
+                                         "Access-Control-Request-Headers": "content-type"})
+    assert r.headers.get("access-control-allow-origin") == "http://localhost"
+    r = c.options("/api/login", headers={"Origin": "https://evil.example", "Access-Control-Request-Method": "POST"})
+    assert "access-control-allow-origin" not in r.headers

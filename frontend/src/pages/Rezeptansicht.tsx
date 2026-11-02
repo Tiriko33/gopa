@@ -102,9 +102,9 @@ export function Rezeptansicht() {
             {g.gruppe && <h3 className="group-title">{g.gruppe}</h3>}
             <ul className="ingredients">
               {g.items.map((z, j) => (
-                <li key={j}>
+                <li key={j} style={{ "--i": j } as React.CSSProperties}>
                   <span className="ing-name">{z.name}</span>
-                  <span className="ing-amount">{formatAmount(scaleAmount(z.menge, r.portionen, portionen), z.einheit)}</span>
+                  <span key={portionen} className="ing-amount bump">{formatAmount(scaleAmount(z.menge, r.portionen, portionen), z.einheit)}</span>
                 </li>
               ))}
             </ul>
@@ -117,7 +117,7 @@ export function Rezeptansicht() {
         <h2 className="steps-title">Zubereitung</h2>
         <ol className="steps">
           {r.schritte.map((s) => (
-            <li key={s.nr}>
+            <li key={s.nr} style={{ "--i": s.nr } as React.CSSProperties}>
               <span className="step-nr" aria-hidden="true">{s.nr}</span>
               <span>{s.text}{s.timer_min ? <em className="step-timer"> · {s.timer_min} Min</em> : null}</span>
             </li>

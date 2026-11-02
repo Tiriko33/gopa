@@ -117,6 +117,7 @@ def _ollama_chat(cfg: Settings, messages: list[dict], http=None) -> str:
         r = http.post(f"{cfg.ollama_url}/api/chat", timeout=cfg.ollama_timeout, json={
             "model": cfg.ollama_model, "messages": messages, "stream": False,
             "format": claude_json_schema(),  # strukturierte Ausgabe: Ollama erzwingt das Schema
+            "keep_alive": int(cfg.ollama_keep_alive) if cfg.ollama_keep_alive.lstrip("-").isdigit() else cfg.ollama_keep_alive,
             "think": False,  # Denkmodus aus: deutlich schneller, das Schema erzwingt die Struktur ohnehin
             "options": {"temperature": 0},
         })

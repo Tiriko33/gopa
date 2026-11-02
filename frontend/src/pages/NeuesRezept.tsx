@@ -4,6 +4,7 @@ import { api, type Job } from "../lib/api";
 import { FILTER_CHIPS, type Kategorie } from "../lib/types";
 import { GopaBear } from "../components/GopaBear";
 import { BearSays } from "../components/SpeechBubble";
+import { CookingLoader } from "../components/CookingLoader";
 import { BackIcon, Paw } from "../components/icons";
 
 const STEPS: Job["step"][] = ["download", "transcribe", "translate"];
@@ -125,6 +126,7 @@ export function NeuesRezept() {
 
         {starting && (
           <div className="progress-card" role="status" aria-live="polite">
+            <CookingLoader />
             <span className="progress-title">Gopa kocht das Rezept…</span>
             {LABELS.map((label, i) => {
               const done = i < stepIdx, active = i === Math.max(stepIdx, 0);

@@ -1,0 +1,74 @@
+# GitLab CI: testet, baut die Android-APK und veröffentlicht die Download-Seite (GitLab Pages).
+# Läuft auf gitlab.com mit den Shared Runnern. Ergebnis nach dem ersten Lauf auf main:
+#   https://<dein-name>.gitlab.io/<projekt>/            Startseite mit Download-Button
+#   https://<dein-name>.gitlab.io/<projekt>/gopa.apk    die App
+
+stages: [test, build, deploy]
+
+test:backend:
+  stage: test
+  image: python:3.12-slim
+  script:
+    - cd backend
+    - pip install --no-cache-dir pydantic pytest fastapi python-multipart httpx anthropic yt-dlp
+    - python -m pytest -q
+
+test:frontend:
+  stage: test
+  image: node:22
+  script:
+    - cd frontend
+    - npm ci
+    - npm test
+    - npm run build
+
+# Debug-APK mit festem Test-Zertifikat (installierbar per Hand, kein Play Store).
+build:apk:
+  stage: build
+  image: eclipse-temurin:21-jdk
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  variables:
+    ANDROID_HOME: /opt/android-sdk
+    GRADLE_USER_HOME: $CI_PROJECT_DIR/.gradle
+  cache:
+    key: gradle
+    paths: [.gradle/caches, .gradle/wrapper]
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq curl unzip ca-certificates
+    - curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+    - apt-get install -y -qq nodejs
+    - mkdir -p $ANDROID_HOME/cmdline-tools
+    - curl -fsSL -o /tmp/cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+    - unzip -q /tmp/cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
+    - mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
+    - export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+    - yes | sdkmanager --licenses > /dev/null
+    - sdkmanager "platforms;android-36" "build-tools;36.0.0" > /dev/null
+  script:
+    - cd frontend
+    - npm ci
+    - npm run build
+    - npx cap sync android
+    - cd android
+    - chmod +x gradlew
+    - ./gradlew assembleDebug --no-daemon
+    - cp app/build/outputs/apk/debug/app-debug.apk $CI_PROJECT_DIR/gopa.apk
+  artifacts:
+    paths: [gopa.apk]
+    expire_in: 3 months
+
+# Der Jobname "pages" veröffentlicht den Ordner public/ automatisch.
+pages:
+  stage: deploy
+  image: alpine:3
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  needs: ["build:apk"]
+  script:
+    - mkdir -p public
+    - cp docs/site/index.html public/index.html
+    - cp docs/design/assets/gopa-bear.svg docs/design/assets/icon-192.png public/
+    - cp gopa.apk public/gopa.apk
+  artifacts:
+    paths: [public]

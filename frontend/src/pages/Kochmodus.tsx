@@ -92,9 +92,9 @@ export function Kochmodus() {
       </div>
 
       <div className="cook-main">
-        <p className="cook-text" aria-live="polite">{schritt.text}</p>
+        <p key={i} className="cook-text step-in" aria-live="polite">{schritt.text}</p>
         {schritt.timer_min ? (
-          <button className="timer-pill" onClick={toggleTimer} aria-label={`${timerLabel}, ${formatTimer(restSek)}`}>
+          <button className={t?.done ? "timer-pill done" : t?.endAt ? "timer-pill running" : "timer-pill"} onClick={toggleTimer} aria-label={`${timerLabel}, ${formatTimer(restSek)}`}>
             <span className="timer-icon">
               <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3B2412" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="13" r="8" /><path d="M12 9v4l2.5 2M9 3h6" /></svg>
             </span>
@@ -105,7 +105,7 @@ export function Kochmodus() {
 
       <div className="cook-bear">
         <GopaBear size={92} outlinePuffs={false} />
-        {schritt.tipp && <div className="cook-bubble">{schritt.tipp}</div>}
+        {schritt.tipp && <div key={i} className="cook-bubble">{schritt.tipp}</div>}
       </div>
 
       <div className="cook-nav">
