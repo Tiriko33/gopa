@@ -233,3 +233,11 @@ def test_download_accepts_short_video(tmp_path, monkeypatch):
     monkeypatch.setattr(_src.subprocess, "run", _fake_run(30))
     d = _src.download("https://www.tiktok.com/@a/video/1", tmp_path, CFG)
     assert d.creator == "u" and d.video_path.name == "video.mp4"
+
+
+def test_original_only_kept_when_it_proves_a_us_conversion():
+    d = rezept_dict(zutaten=[{"name": "Salz", "original": "Salz"},
+                             {"name": "Hähnchen", "menge": 1000, "einheit": "g", "original": "1kg"},
+                             {"name": "Mehl", "menge": 240, "einheit": "ml", "original": "1 cup flour"}])
+    r, _ = llm.postprocess(Rezept.model_validate(d))
+    assert [z.original for z in r.zutaten] == [None, None, "1 cup flour"]
