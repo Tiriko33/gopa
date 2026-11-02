@@ -1,3 +1,4 @@
+import { getToken, setToken } from "./auth";
 import type { Kategorie, Rezept } from "./types";
 
 export interface Job {
@@ -16,11 +17,15 @@ export class ApiError extends Error {
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
+  const token = getToken();
+  const headers = new Headers(init?.headers);
+  if (token) headers.set("Authorization", `Bearer ${token}`);
   try {
-    res = await fetch(path, init);
+    res = await fetch(path, { ...init, headers });
   } catch {
     throw new ApiError(0, "Gopa erreicht den Server nicht. Prüfe deine Internetverbindung.");
   }
+  if (res.status === 401 && path !== "/api/login") setToken(null); // Token ungültig: zurück zum Login
   if (!res.ok) {
     let msg = "Das hat nicht geklappt.";
     try {
@@ -39,6 +44,7 @@ const json = (method: string, body: unknown): RequestInit => ({
 });
 
 export const api = {
+  login: (password: string) => request<{ token: string }>("/api/login", json("POST", { password })),
   listRecipes: (kategorie: string, q: string) => {
     const p = new URLSearchParams();
     if (kategorie !== "Alle") p.set("kategorie", kategorie);

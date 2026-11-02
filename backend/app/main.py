@@ -1,14 +1,20 @@
 import tempfile
 from pathlib import Path
 
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
+from .auth import Auth
 from .config import Settings, load_settings
 from .db import RecipeRepo
 from .jobs import JobManager, RateLimited
 from .pipeline import PipelineInput
 from .schema import Kategorie, Rezept
+
+
+class Login(BaseModel):
+    password: str
 
 
 class Patch(BaseModel):
@@ -20,10 +26,16 @@ def create_app(cfg: Settings, repo: RecipeRepo | None = None, manager: JobManage
     repo = repo or RecipeRepo(cfg.data_dir / "gopa.db")
     manager = manager or JobManager(cfg)
     app = FastAPI(title="Gopa")
+    auth = Auth(cfg.app_password)
+    api = APIRouter(dependencies=[Depends(auth.require)])
 
     @app.get("/api/health")
     def health():
         return {"ok": True}
+
+    @app.post("/api/login")
+    def login(body: Login):
+        return {"token": auth.login(body.password)}
 
     # ---- Jobs (Link -> Rezept-Entwurf) ----
     async def _save_upload(f: UploadFile, limit: int) -> Path:
@@ -39,7 +51,7 @@ def create_app(cfg: Settings, repo: RecipeRepo | None = None, manager: JobManage
         tmp.close()
         return Path(tmp.name)
 
-    @app.post("/api/jobs")
+    @api.post("/api/jobs")
     async def create_job(link: str = Form(...), text: str = Form(""), files: list[UploadFile] = File(default=[])):
         """Fallback-Material: ein Video und/oder bis zu 8 Screenshots (Bilder)."""
         video: Path | None = None
@@ -66,7 +78,7 @@ def create_app(cfg: Settings, repo: RecipeRepo | None = None, manager: JobManage
             raise
         return {"id": job.id}
 
-    @app.get("/api/jobs/{job_id}")
+    @api.get("/api/jobs/{job_id}")
     def get_job(job_id: str):
         job = manager.jobs.get(job_id)
         if not job:
@@ -74,39 +86,56 @@ def create_app(cfg: Settings, repo: RecipeRepo | None = None, manager: JobManage
         return {"id": job.id, "status": job.status, "step": job.step, "result": job.result, "error": job.error}
 
     # ---- Rezepte ----
-    @app.get("/api/recipes")
+    @api.get("/api/recipes")
     def list_recipes(kategorie: str | None = None, q: str | None = None, favorit: bool | None = None):
         return repo.list(kategorie, q, favorit)
 
-    @app.post("/api/recipes", status_code=201)
+    @api.post("/api/recipes", status_code=201)
     def save_recipe(r: Rezept):
         return repo.create(r)
 
-    @app.get("/api/recipes/{rid}")
+    @api.get("/api/recipes/{rid}")
     def get_recipe(rid: str):
         rec = repo.get(rid)
         if not rec:
             raise HTTPException(404, "Rezept nicht gefunden")
         return rec
 
-    @app.put("/api/recipes/{rid}")
+    @api.put("/api/recipes/{rid}")
     def update_recipe(rid: str, r: Rezept):
         rec = repo.update(rid, r)
         if not rec:
             raise HTTPException(404, "Rezept nicht gefunden")
         return rec
 
-    @app.patch("/api/recipes/{rid}")
+    @api.patch("/api/recipes/{rid}")
     def patch_recipe(rid: str, p: Patch):
         rec = repo.patch(rid, p.kategorie, p.favorit)
         if not rec:
             raise HTTPException(404, "Rezept nicht gefunden")
         return rec
 
-    @app.delete("/api/recipes/{rid}", status_code=204)
+    @api.delete("/api/recipes/{rid}", status_code=204)
     def delete_recipe(rid: str):
         if not repo.delete(rid):
             raise HTTPException(404, "Rezept nicht gefunden")
+
+    app.include_router(api)
+
+    # Gebautes Frontend ausliefern (im Docker-Image), mit Fallback auf index.html für die App-Routen
+    static = cfg.static_dir
+    if static and (static / "index.html").exists():
+        root = static.resolve()
+
+        @app.get("/{path:path}", include_in_schema=False)
+        def spa(path: str):
+            if path.startswith("api/"):
+                raise HTTPException(404)
+            f = (root / path).resolve()
+            if path and f.is_file() and root in f.parents:
+                headers = {"Cache-Control": "no-cache"} if f.name in ("sw.js", "index.html", "manifest.webmanifest") else {}
+                return FileResponse(f, headers=headers)
+            return FileResponse(root / "index.html", headers={"Cache-Control": "no-cache"})
 
     return app
 
