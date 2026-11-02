@@ -4,6 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.config import Settings
+from app.auth import make_token
 from app.db import RecipeRepo
 from app.main import create_app
 from app.schema import Rezept
@@ -76,8 +77,10 @@ def test_source_link_is_stored(repo):
 # --- API ---
 @pytest.fixture
 def client(tmp_path):
-    cfg = Settings("", "", "", "small", 1, 1, 1, 1, 1, 1, False, 20, Path(tmp_path))
-    return TestClient(create_app(cfg))
+    cfg = Settings("", "", "pw", "small", 1, 1, 1, 1, 1, 1, False, 20, Path(tmp_path))
+    c = TestClient(create_app(cfg))
+    c.headers["Authorization"] = "Bearer " + make_token("pw")
+    return c
 
 
 def test_api_roundtrip(client):

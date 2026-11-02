@@ -25,6 +25,7 @@ class Settings:
     enable_ocr: bool
     rate_limit_per_hour: int
     data_dir: Path
+    static_dir: Path | None = None
 
 
 def load_settings() -> Settings:
@@ -42,4 +43,5 @@ def load_settings() -> Settings:
         enable_ocr=os.environ.get("ENABLE_OCR", "true").lower() == "true",
         rate_limit_per_hour=_int("RATE_LIMIT_PER_HOUR", 20),
         data_dir=Path(os.environ.get("DATA_DIR", "./data")),
+        static_dir=Path(os.environ["STATIC_DIR"]) if os.environ.get("STATIC_DIR") else None,
     )
