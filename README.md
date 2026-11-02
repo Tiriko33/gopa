@@ -6,7 +6,7 @@ Speichern, nach Kategorie filtern, Original-Link behalten, Einkaufsliste, Kochmo
 Gebaut für eine Person (plus Admin). Kein Store-Release, kein Multi-User-System.
 
 ```
-backend/   FastAPI, SQLite, Pipeline (yt-dlp, ffmpeg, faster-whisper, Tesseract, Claude)
+backend/   FastAPI, SQLite, Pipeline (yt-dlp, ffmpeg, faster-whisper, Tesseract, Claude oder Ollama)
 frontend/  React + Vite + TypeScript, PWA (Manifest, Service Worker, Share Target)
 docs/      Design-Vorlage (docs/design) und ursprünglicher Auftrag
 Dockerfile, docker-compose.yml, .env.example
@@ -16,7 +16,7 @@ Dockerfile, docker-compose.yml, .env.example
 
 1. Link einfügen oder in TikTok/Instagram auf **Teilen → Gopa** tippen.
 2. Das Backend lädt Beschreibung und Video (yt-dlp). Steht ein vollständiges Rezept in der Beschreibung, wird sie direkt benutzt. Sonst wird der Ton transkribiert (faster-whisper) und eingeblendeter Text gelesen (Tesseract, optional).
-3. Claude macht daraus ein deutsches Rezept als JSON (Mengen umgerechnet, nichts erfunden, Lücken stehen in "Hinweise").
+3. Ein Sprachmodell (Claude-API **oder** lokales Ollama-Modell, siehe unten) macht daraus ein deutsches Rezept als JSON (Mengen umgerechnet, nichts erfunden, Lücken stehen in "Hinweise").
 4. Video und Zwischendateien werden gelöscht. Gespeichert werden nur Rezept, Quell-Link, Plattform und Creator.
 
 Wenn Instagram das Laden verweigert (kommt vor), bietet die App als Fallback an: Rezepttext einfügen und/oder Screenshots bzw. Video hochladen.
@@ -33,11 +33,41 @@ docker compose up -d --build
 
 Die App lauscht auf `127.0.0.1:8000`. Der erste Rezept-Job lädt einmalig das Whisper-Modell (einige hundert MB), das dauert dann länger.
 
+### Sprachmodell: Ollama (ohne Key) oder Claude-API
+
+Ein Sprachmodell formt die Rohtexte aus dem Video zum deutschen Rezept. Du wählst mit `LLM_PROVIDER`:
+
+| | `ollama` (lokal) | `anthropic` (Claude-API) |
+|---|---|---|
+| Kosten | keine | wenige Cent pro Rezept |
+| Key nötig | nein | ja (console.anthropic.com) |
+| Qualität bei Deutsch, Umrechnung, JSON | geringer, Modellwahl wichtig | sehr gut |
+| Server | RAM/GPU nötig, 7B-Modell braucht ca. 6 bis 8 GB | egal |
+| Screenshots lesen | nur mit Vision-Modell (z. B. `qwen2.5vl`) | ja |
+
+**Ollama auf dem Server einrichten** (zwei Wege):
+
+```bash
+# Weg 1: Ollama läuft schon auf dem Host (https://ollama.com), Modell laden:
+ollama pull qwen2.5:7b
+# in .env:  LLM_PROVIDER=ollama, OLLAMA_URL=http://host.docker.internal:11434, OLLAMA_MODEL=qwen2.5:7b
+
+# Weg 2: Ollama als Container neben Gopa
+docker compose --profile ollama up -d --build
+docker compose exec ollama ollama pull qwen2.5:7b
+# in .env:  OLLAMA_URL=http://ollama:11434
+```
+
+Die Rezeptqualität hängt stark vom Modell ab. Größere Modelle (z. B. `qwen2.5:14b`) machen weniger Fehler, brauchen aber mehr Speicher und Zeit. Ein Rezept dauert auf der CPU schnell mehrere Minuten; `OLLAMA_TIMEOUT` (Standard 300 Sekunden) bei Bedarf erhöhen. Prüfe neue Rezepte bei Ollama kurz gegen das Video, vor allem Mengen.
+
 ### .env
 
 ```
-ANTHROPIC_API_KEY=sk-ant-...      # aus console.anthropic.com, API Keys (braucht Guthaben)
-CLAUDE_MODEL=claude-sonnet-5-5    # Modell frei wählbar
+LLM_PROVIDER=ollama               # oder anthropic
+OLLAMA_URL=http://host.docker.internal:11434
+OLLAMA_MODEL=qwen2.5:7b
+ANTHROPIC_API_KEY=sk-ant-...      # nur bei LLM_PROVIDER=anthropic
+CLAUDE_MODEL=claude-sonnet-5-5    # nur bei LLM_PROVIDER=anthropic
 APP_PASSWORD=ein-langes-zufaelliges-passwort
 WHISPER_MODEL=small               # tiny/base/small/medium: größer = genauer, aber langsamer
 MAX_VIDEO_MB=150
@@ -100,7 +130,9 @@ docker compose up -d
 
 Der Build installiert die neueste yt-dlp-Version. Bei Instagram hilft oft auch der Fallback in der App (Text oder Screenshot).
 
-**"Gopa ist noch nicht eingerichtet".** `APP_PASSWORD` fehlt in der `.env`. Ohne Passwort ist die API gesperrt.
+**"Gopa ist noch nicht eingerichtet".** `APP_PASSWORD` fehlt in der `.env` (ohne Passwort ist die API gesperrt) oder bei der gewählten KI fehlt `OLLAMA_MODEL` bzw. der Claude-Key.
+
+**"Gopa erreicht das lokale Sprachmodell nicht".** Läuft Ollama (`curl http://localhost:11434`)? Stimmt `OLLAMA_URL` (im Container nicht `localhost`!)? Wurde das Modell mit `ollama pull` geladen?
 
 **Anmeldung klappt nicht mehr.** Wurde `APP_PASSWORD` geändert, melden sich alle Geräte neu an. Nach 10 falschen Versuchen sperrt Gopa die Anmeldung für 10 Minuten.
 

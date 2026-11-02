@@ -1,5 +1,6 @@
 """Schritt 4: Claude strukturiert die Texte zu einem deutschen Rezept (JSON per erzwungenem Tool-Aufruf)."""
 import base64
+import json
 
 from pydantic import ValidationError
 
@@ -73,18 +74,72 @@ def _content(user: str, images: list[tuple[str, bytes]]) -> str | list[dict]:
 def structure_recipe(texts: dict, source: dict, cfg: Settings, client=None,
                      images: list[tuple[str, bytes]] | None = None) -> Rezept:
     """texts: caption, transcript, ocr, title, manual. source: url, plattform, creator.
-    images: Screenshots (media_type, bytes) als Fallback, Claude liest sie direkt."""
+    images: Screenshots (media_type, bytes) als Fallback. Anbieter laut cfg.llm_provider:
+    "anthropic" (Claude-API) oder "ollama" (lokales Modell, kein API-Schlüssel). client: Testweiche."""
     images = images or []
-    if not cfg.anthropic_api_key or not cfg.claude_model:
+    user = build_user_message(texts.get("caption", ""), texts.get("transcript", ""), texts.get("ocr", ""),
+                              texts.get("title"), texts.get("manual", ""))
+    if cfg.llm_provider == "ollama":
+        if not cfg.ollama_model:
+            raise PipelineError("Gopa ist nicht vollständig eingerichtet (OLLAMA_MODEL fehlt).",
+                                "not_configured", fallback=False)
+    elif not cfg.anthropic_api_key or not cfg.claude_model:
         raise PipelineError("Gopa ist nicht vollständig eingerichtet (API-Schlüssel oder Modell fehlt).",
                             "not_configured", fallback=False)
+    if not user.strip() and not images:
+        raise PipelineError("Gopa hat keinen Text gefunden, aus dem ein Rezept werden kann.", "no_text")
+    if cfg.llm_provider == "ollama":
+        return _structure_ollama(user, source, cfg, images, http=client)
+    return _structure_anthropic(user, source, cfg, images, client)
+
+
+# ---------- Ollama (lokales Modell) ----------
+
+OLLAMA_SYSTEM = SYSTEM.replace("- Ist der Inhalt kein Rezept, rufe kein_rezept auf.\n", "") + \
+    "\n- Antworte ausschließlich mit einem JSON-Objekt nach dem vorgegebenen Schema, ohne weiteren Text."
+
+
+def _ollama_chat(cfg: Settings, messages: list[dict], http=None) -> str:
+    if http is None:
+        import httpx as http  # type: ignore[no-redef]
+    try:
+        r = http.post(f"{cfg.ollama_url}/api/chat", timeout=cfg.ollama_timeout, json={
+            "model": cfg.ollama_model, "messages": messages, "stream": False,
+            "format": claude_json_schema(),  # strukturierte Ausgabe: Ollama erzwingt das Schema
+            "options": {"temperature": 0},
+        })
+        r.raise_for_status()
+        return r.json()["message"]["content"]
+    except Exception as e:  # noqa: BLE001 - nicht erreichbar, Modell fehlt, Timeout
+        raise PipelineError("Gopa erreicht das lokale Sprachmodell nicht oder es war zu langsam. "
+                            "Läuft Ollama und ist das Modell geladen?", "llm_failed") from e
+
+
+def _structure_ollama(user: str, source: dict, cfg: Settings, images: list[tuple[str, bytes]], http=None) -> Rezept:
+    first: dict = {"role": "user", "content": user or "Lies das Rezept aus den Bildern."}
+    if images:  # nur Vision-Modelle (z. B. llava, qwen2.5vl) können Bilder lesen
+        first["images"] = [base64.b64encode(raw).decode() for _, raw in images]
+    messages = [{"role": "system", "content": OLLAMA_SYSTEM}, first]
+    for _attempt in range(2):
+        content = _ollama_chat(cfg, messages, http)
+        try:
+            data = json.loads(content)
+            rezept = Rezept.model_validate({**data, "quelle": source})
+            rezept, _ = postprocess(rezept)
+            return rezept
+        except (json.JSONDecodeError, ValidationError, TypeError) as e:
+            messages += [{"role": "assistant", "content": content},
+                         {"role": "user", "content": f"Das war ungültig, bitte korrigieren: {str(e)[:600]}"}]
+    raise PipelineError("Das lokale Modell hat kein vollständiges Rezept geliefert. "
+                        "Versuche es noch einmal oder füge den Text selbst hinzu.", "invalid_json")
+
+
+# ---------- Anthropic (Claude-API) ----------
+
+def _structure_anthropic(user: str, source: dict, cfg: Settings, images: list[tuple[str, bytes]], client=None) -> Rezept:
     if client is None:
         import anthropic
         client = anthropic.Anthropic(api_key=cfg.anthropic_api_key, timeout=cfg.timeout_llm)
-    user = build_user_message(texts.get("caption", ""), texts.get("transcript", ""), texts.get("ocr", ""),
-                              texts.get("title"), texts.get("manual", ""))
-    if not user.strip() and not images:
-        raise PipelineError("Gopa hat keinen Text gefunden, aus dem ein Rezept werden kann.", "no_text")
     messages = [{"role": "user", "content": _content(user, images)}]
     last_error = ""
     for _attempt in range(2):

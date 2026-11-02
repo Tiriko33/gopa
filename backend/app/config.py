@@ -26,6 +26,10 @@ class Settings:
     rate_limit_per_hour: int
     data_dir: Path
     static_dir: Path | None = None
+    llm_provider: str = "anthropic"  # anthropic | ollama
+    ollama_url: str = "http://localhost:11434"
+    ollama_model: str = ""
+    ollama_timeout: int = 300
 
 
 def load_settings() -> Settings:
@@ -44,4 +48,8 @@ def load_settings() -> Settings:
         rate_limit_per_hour=_int("RATE_LIMIT_PER_HOUR", 20),
         data_dir=Path(os.environ.get("DATA_DIR", "./data")),
         static_dir=Path(os.environ["STATIC_DIR"]) if os.environ.get("STATIC_DIR") else None,
+        llm_provider=os.environ.get("LLM_PROVIDER", "anthropic").strip().lower(),
+        ollama_url=os.environ.get("OLLAMA_URL", "http://localhost:11434").rstrip("/"),
+        ollama_model=os.environ.get("OLLAMA_MODEL", ""),
+        ollama_timeout=_int("OLLAMA_TIMEOUT", 300),
     )
