@@ -6,9 +6,21 @@ services:
       - gopa-data:/data          # SQLite-Datenbank und Whisper-Modell-Cache
     environment:
       HF_HOME: /data/hf          # faster-whisper lädt sein Modell einmalig hierhin
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # Ollama auf dem Host erreichen (Linux)
     ports:
       - "127.0.0.1:8000:8000"    # nur lokal erreichbar: HTTPS-Reverse-Proxy davorschalten
     restart: unless-stopped
 
+  # Optional: Ollama als Container (docker compose --profile ollama up -d).
+  # Danach einmalig das Modell laden: docker compose exec ollama ollama pull qwen2.5:7b
+  ollama:
+    image: ollama/ollama
+    profiles: ["ollama"]
+    volumes:
+      - ollama-models:/root/.ollama
+    restart: unless-stopped
+
 volumes:
   gopa-data:
+  ollama-models:

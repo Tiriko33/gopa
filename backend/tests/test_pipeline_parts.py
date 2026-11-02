@@ -143,3 +143,64 @@ def test_images_are_sent_to_claude_as_image_blocks():
     d = rezept_dict(); d.pop("quelle")
     llm.structure_recipe({}, QUELLE, CFG, client=C([("speichere_rezept", d)]), images=[("image/png", b"abc")])
     assert seen["content"][0]["type"] == "image" and seen["content"][-1]["type"] == "text"
+
+
+# --- Ollama (gemockt) ---
+import json as _json
+from dataclasses import replace
+
+OLLAMA_CFG = replace(CFG, llm_provider="ollama", ollama_model="qwen2.5:7b", anthropic_api_key="", claude_model="")
+
+
+class FakeHttp:
+    def __init__(self, replies):
+        self.replies = list(replies)
+        self.calls = []
+
+    def post(self, url, timeout=None, json=None):
+        self.calls.append((url, json))
+        reply = self.replies.pop(0)
+        if isinstance(reply, Exception):
+            raise reply
+        resp = types.SimpleNamespace(raise_for_status=lambda: None,
+                                     json=lambda: {"message": {"content": reply}})
+        return resp
+
+
+def _good():
+    d = rezept_dict(zutaten=[{"name": "Mehl", "menge": 1, "einheit": "cup"}])
+    d.pop("quelle")
+    return _json.dumps(d)
+
+
+def test_ollama_returns_recipe_and_sends_schema_and_converts():
+    http = FakeHttp([_good()])
+    r = llm.structure_recipe({"caption": "x"}, QUELLE, OLLAMA_CFG, client=http)
+    assert r.zutaten[0].einheit == "ml" and r.zutaten[0].original == "1 cup"
+    url, body = http.calls[0]
+    assert url.endswith("/api/chat") and body["model"] == "qwen2.5:7b" and body["stream"] is False
+    assert body["format"]["properties"].get("titel") and "quelle" not in body["format"]["properties"]
+
+
+def test_ollama_retries_on_invalid_json():
+    http = FakeHttp(["kein json", _good()])
+    assert llm.structure_recipe({"caption": "x"}, QUELLE, OLLAMA_CFG, client=http).titel == "Pfannkuchen"
+    assert len(http.calls) == 2
+
+
+def test_ollama_gives_up_after_two_invalid_answers():
+    with pytest.raises(PipelineError) as e:
+        llm.structure_recipe({"caption": "x"}, QUELLE, OLLAMA_CFG, client=FakeHttp(["{}", "{}"]))
+    assert e.value.code == "invalid_json"
+
+
+def test_ollama_unreachable_gives_german_message():
+    with pytest.raises(PipelineError) as e:
+        llm.structure_recipe({"caption": "x"}, QUELLE, OLLAMA_CFG, client=FakeHttp([ConnectionError("down")]))
+    assert e.value.code == "llm_failed" and "Ollama" in e.value.message
+
+
+def test_ollama_needs_model_but_no_api_key():
+    with pytest.raises(PipelineError) as e:
+        llm.structure_recipe({"caption": "x"}, QUELLE, replace(OLLAMA_CFG, ollama_model=""))
+    assert e.value.code == "not_configured"
