@@ -17,7 +17,8 @@ Regeln:
 - Erfinde NIEMALS Mengen oder Zutaten. Fehlt eine Menge, lass menge leer (null) und notiere in "hinweise" \
 z. B. "Menge von Butter im Video nicht genannt".
 - Rechne Einheiten um: Cups/oz/lb in g bzw. ml, °F in °C (auf 5 gerundet), Stick Butter = 113 g. \
-Esslöffel = EL, Teelöffel = TL. Schreibe die Originalangabe in "original" (z. B. "1 cup flour"), \
+Esslöffel bleiben EL, Teelöffel bleiben TL (tbsp = EL, tsp = TL): rechne EL und TL NIEMALS in ml oder g um, \
+auch kg, g, ml und l bleiben wie genannt. Schreibe die Originalangabe in "original" (z. B. "1 cup flour"), \
 sonst null.
 - Ordne Zutaten in Gruppen (z. B. "Teig", "Soße"), wenn das Rezept das hergibt, sonst gruppe = null.
 - Schritte kurz und klar. timer_min nur, wenn eine Zeit zum Warten/Garen genannt wird. \

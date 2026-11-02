@@ -123,8 +123,20 @@ def _transcribe_blocking(audio: Path, model_name: str) -> str:
 
     if _model is None:
         _model = WhisperModel(model_name, device="cpu", compute_type="int8")
-    segments, _info = _model.transcribe(str(audio), vad_filter=True)  # Sprache wird automatisch erkannt
+    segments, _info = _model.transcribe(read_wav(audio), vad_filter=True)  # Sprache wird automatisch erkannt
     return " ".join(s.text.strip() for s in segments).strip()
+
+
+def read_wav(path: Path):
+    """16-kHz-Mono-WAV (von ffmpeg erzeugt) als float32-Array. So decodiert faster-whisper nicht selbst
+    (sein Dekoder über PyAV bricht bei neueren PyAV-Versionen ab)."""
+    import wave
+
+    import numpy as np
+
+    with wave.open(str(path), "rb") as w:
+        raw = w.readframes(w.getnframes())
+    return np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
 
 
 def transcribe(audio: Path, cfg: Settings) -> str:
@@ -135,6 +147,9 @@ def transcribe(audio: Path, cfg: Settings) -> str:
         return fut.result(timeout=cfg.timeout_transcribe)
     except FutureTimeout:
         raise PipelineError("Das Erkennen des gesprochenen Textes hat zu lange gedauert.", "whisper_timeout")
+    except Exception as e:  # noqa: BLE001 - Modell fehlt, kaputte Datei, nicht installiert
+        raise PipelineError("Gopa konnte den gesprochenen Text nicht erkennen. Füge den Text oder einen Screenshot hinzu.",
+                            "whisper_failed") from e
     finally:
         ex.shutdown(wait=False)
 
