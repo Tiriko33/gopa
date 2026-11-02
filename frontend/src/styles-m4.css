@@ -1,0 +1,91 @@
+/* Neues Rezept */
+.neu-head { padding: 28px 20px 0; display: flex; align-items: center; gap: 12px; }
+.neu-head h1 { font-family: var(--font-heading); font-size: 28px; font-weight: 800; color: var(--gopa-blau); }
+.round-btn.bordered { border: 2px solid var(--creme-rahmen); }
+.neu-bear { padding: 16px 20px 0; display: flex; align-items: center; gap: 12px; }
+.bubble-left { flex: 1; padding: 12px 14px; background: #fff; border: 2px solid var(--himmelblau-rahmen); border-radius: 20px 20px 20px 6px; font-size: 14px; font-weight: 700; line-height: 1.4; }
+.neu-form { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.field-label { font-size: 14px; font-weight: 800; color: #1F3B5E; }
+.link-row { display: flex; gap: 8px; }
+.link-row input, .text-in { flex: 1; min-width: 0; height: 52px; padding: 0 18px; background: #fff; border: 2px solid var(--himmelblau-rahmen); border-radius: 999px; font-size: 16px; font-weight: 600; color: var(--marine); }
+.link-row input:focus, .text-in:focus { outline: 0; border-color: var(--gopa-blau); }
+.paste-btn { height: 52px; min-width: 44px; padding: 0 18px; border-radius: 999px; border: 2px solid var(--gopa-blau); background: #fff; color: var(--gopa-blau); font-size: 14px; font-weight: 800; cursor: pointer; }
+.tip { font-size: 13px; font-weight: 700; line-height: 1.45; color: var(--gedaempft); }
+.chips.tight { padding: 0; }
+.chip:disabled, .paste-btn:disabled, .btn:disabled, .btn-text:disabled { opacity: 0.5; cursor: default; }
+.fallback { display: flex; flex-direction: column; gap: 8px; padding: 14px; border: 2px dashed var(--himmelblau-rahmen); border-radius: 22px; }
+.fallback textarea { border: 2px solid var(--himmelblau-rahmen); border-radius: 18px; padding: 12px; font-size: 16px; font-weight: 600; font-family: inherit; color: var(--marine); }
+.fallback input[type=file] { font-size: 14px; min-height: 44px; }
+.progress-card { padding: 16px; background: var(--creme); border: 2px solid var(--creme-rahmen); border-radius: 24px; display: flex; flex-direction: column; gap: 14px; }
+.progress-title { font-family: var(--font-heading); font-size: 18px; font-weight: 800; }
+.progress-step { display: flex; align-items: center; gap: 12px; font-size: 15px; }
+.dot { width: 28px; height: 28px; flex: none; border-radius: 50%; border: 2px solid #D9C196; background: #fff; display: flex; align-items: center; justify-content: center; }
+.dot.done { background: var(--gopa-blau); border-color: var(--gopa-blau); }
+.dot.active { border: 3px solid var(--honig); background: #FDEBC8; }
+.step-active { font-weight: 800; color: var(--blau-text); }
+.step-done { font-weight: 700; }
+.step-todo { font-weight: 700; color: var(--creme-text); }
+.bar { height: 10px; border-radius: 999px; background: #F3E3C1; overflow: hidden; }
+.bar div { height: 100%; background: var(--honig); border-radius: 999px; transition: width 0.4s; }
+.neu-actions { margin-top: auto; display: flex; flex-direction: column; gap: 6px; padding-top: 8px; }
+.btn.big { height: 54px; font-size: 16px; }
+.btn-text { min-height: 46px; border: 0; background: transparent; color: var(--gopa-blau); font-size: 14px; font-weight: 800; cursor: pointer; }
+.btn-text.left { text-align: left; align-self: flex-start; }
+.btn-text.danger { color: #B3261E; }
+
+/* Einkaufsliste */
+.clear-row { padding: 4px 20px 10px; display: flex; justify-content: flex-end; }
+.clear-btn { height: 44px; padding: 0 16px; border-radius: 999px; border: 2px solid var(--himmelblau-rahmen); background: #fff; color: var(--gopa-blau); font-size: 13px; font-weight: 800; cursor: pointer; }
+.clear-btn:disabled { opacity: 0.5; cursor: default; }
+.shop-group { font-family: var(--font-heading); font-size: 17px; font-weight: 700; color: var(--creme-text); margin: 4px 0 8px; }
+.shop-card { list-style: none; margin: 0; padding: 2px 16px; background: var(--creme); border: 2px solid var(--creme-rahmen); border-radius: 22px; }
+.shop-card li { border-bottom: 1.5px dashed var(--creme-linie); }
+.shop-card li:last-child { border-bottom: 0; }
+.shop-row { position: relative; display: flex; align-items: center; gap: 14px; min-height: 52px; cursor: pointer; }
+.shop-row input { position: absolute; opacity: 0; width: 44px; height: 44px; left: -8px; margin: 0; cursor: pointer; }
+.box { width: 28px; height: 28px; flex: none; border-radius: 10px; border: 2px solid #C9A56B; background: #fff; display: flex; align-items: center; justify-content: center; }
+.shop-row.done .box { background: var(--honig); border-color: var(--honig); }
+.shop-row input:focus-visible + .box { outline: 3px solid var(--honig); outline-offset: 2px; }
+.shop-name { flex: 1; font-size: 15px; font-weight: 700; }
+.shop-amount { font-size: 15px; font-weight: 800; color: var(--blau-text); white-space: nowrap; }
+.shop-row.done .shop-name, .shop-row.done .shop-amount { color: #6B5A45; }
+.shop-row.done .shop-name { text-decoration: line-through; }
+.list section + section { margin-top: 6px; }
+
+/* Kochmodus */
+.cook { position: relative; max-width: 480px; min-height: 100dvh; margin: 0 auto; overflow: hidden; background: #0F2E63; color: #fff; display: flex; flex-direction: column; }
+.cook-pad { padding: 28px 20px; }
+.cook-top { padding: 28px 20px 0; display: flex; align-items: center; justify-content: space-between; position: relative; }
+.cook-round { width: 44px; height: 44px; border-radius: 50%; background: #1B4585; display: flex; align-items: center; justify-content: center; }
+.cook-title { font-family: var(--font-heading); font-size: 18px; font-weight: 700; color: #CFE0FA; text-align: center; padding: 0 8px; }
+.cook-progress { padding: 20px 20px 0; display: flex; flex-direction: column; gap: 10px; position: relative; font-size: 14px; font-weight: 800; color: #CFE0FA; }
+.segments { display: flex; gap: 6px; }
+.seg { flex: 1; height: 8px; border-radius: 999px; background: #2A5AA3; }
+.seg.on { background: var(--honig); }
+.cook-main { flex: 1; padding: 0 24px; display: flex; flex-direction: column; justify-content: center; gap: 24px; position: relative; }
+.cook-text { font-family: var(--font-heading); font-size: 32px; font-weight: 700; line-height: 1.25; overflow-wrap: anywhere; }
+.timer-pill { align-self: flex-start; display: flex; align-items: center; gap: 14px; padding: 12px 20px 12px 14px; background: #1B4585; border: 0; border-radius: 999px; color: #fff; cursor: pointer; text-align: left; }
+.timer-icon { width: 46px; height: 46px; border-radius: 50%; background: var(--honig); display: flex; align-items: center; justify-content: center; }
+.timer-text { display: flex; flex-direction: column; gap: 2px; }
+.timer-text b { font-family: var(--font-heading); font-size: 28px; font-weight: 800; line-height: 1; }
+.timer-text small { font-size: 13px; font-weight: 700; color: #CFE0FA; }
+.cook-bear { padding: 0 20px 6px; display: flex; align-items: flex-end; gap: 10px; position: relative; min-height: 98px; }
+.cook-bubble { flex: 1; margin-bottom: 16px; padding: 12px 14px; background: var(--creme); color: var(--marine); border-radius: 20px 20px 20px 6px; font-size: 14px; font-weight: 700; line-height: 1.4; }
+.cook-nav { padding: 8px 20px 24px; display: flex; gap: 12px; position: relative; }
+.cook-back { width: 76px; height: 64px; border: 0; border-radius: 999px; background: #1B4585; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.cook-back:disabled { opacity: 0.4; cursor: default; }
+.cook-next { flex: 1; height: 64px; border: 0; border-radius: 999px; background: var(--honig); color: var(--honig-text); font-size: 19px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
+
+/* Bearbeiten */
+.edit { padding-bottom: 24px; display: flex; flex-direction: column; gap: 8px; }
+.edit > :not(.neu-head) { margin-left: 20px; margin-right: 20px; }
+.edit .neu-head { margin-bottom: 8px; }
+.text-in.area { height: auto; padding: 12px 16px; border-radius: 20px; font-family: inherit; resize: vertical; }
+.text-in.sm { flex: 0 0 76px; padding: 0 10px; height: 48px; border-radius: 16px; }
+.text-in.grow { flex: 1; height: 48px; border-radius: 16px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.edit-h { font-family: var(--font-heading); font-size: 22px; font-weight: 800; margin-top: 10px; }
+.ing-edit { display: flex; gap: 6px; align-items: center; }
+.icon-del { width: 44px; height: 44px; flex: none; border-radius: 50%; border: 0; background: var(--blau-badge); color: var(--blau-text); font-size: 22px; font-weight: 800; cursor: pointer; }
+.step-edit { display: flex; flex-direction: column; gap: 6px; padding: 12px; background: var(--creme); border: 2px solid var(--creme-rahmen); border-radius: 22px; }
+.edit-actions { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }

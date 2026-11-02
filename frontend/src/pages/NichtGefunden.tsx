@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
 import { BearSays } from "../components/SpeechBubble";
 
-/** Platzhalter für Seiten, die in Meilenstein 4 folgen. */
-export function Bald() {
+/** Unbekannte Adresse. */
+export function NichtGefunden() {
   return (
     <div className="page-pad">
       <BearSays role="status" actions={<Link to="/" className="btn btn-primary">Zur Sammlung</Link>}>
-        Daran koche ich noch! Das kommt bald.
+        Hier ist nichts im Topf. Diese Seite gibt es nicht.
       </BearSays>
     </div>
   );

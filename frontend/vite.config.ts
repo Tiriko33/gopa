@@ -37,5 +37,5 @@ export default defineConfig({
       },
     }),
   ],
-  server: { proxy: { "/api": "http://localhost:8000" } },
+  server: { proxy: { "/api": process.env.GOPA_API ?? "http://localhost:8000" } },
 });
