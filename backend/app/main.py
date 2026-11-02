@@ -2,6 +2,7 @@ import tempfile
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
@@ -26,6 +27,10 @@ def create_app(cfg: Settings, repo: RecipeRepo | None = None, manager: JobManage
     repo = repo or RecipeRepo(cfg.data_dir / "gopa.db")
     manager = manager or JobManager(cfg)
     app = FastAPI(title="Gopa")
+    # Die Android-App (Capacitor) läuft unter http://localhost bzw. https://localhost und ruft diesen Server direkt auf.
+    # Es gibt keine Cookies, nur den Authorization-Header, deshalb ist das ungefährlich.
+    app.add_middleware(CORSMiddleware, allow_origins=["http://localhost", "https://localhost", "capacitor://localhost"],
+                       allow_methods=["*"], allow_headers=["Authorization", "Content-Type"])
     auth = Auth(cfg.app_password)
     api = APIRouter(dependencies=[Depends(auth.require)])
 

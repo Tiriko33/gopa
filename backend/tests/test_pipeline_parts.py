@@ -179,6 +179,7 @@ def test_ollama_returns_recipe_and_sends_schema_and_converts():
     assert r.zutaten[0].einheit == "ml" and r.zutaten[0].original == "1 cup"
     url, body = http.calls[0]
     assert url.endswith("/api/chat") and body["model"] == "qwen2.5:7b" and body["stream"] is False
+    assert body["keep_alive"] == 0  # Modell nach dem Rezept sofort entladen
     assert body["format"]["properties"].get("titel") and "quelle" not in body["format"]["properties"]
 
 
