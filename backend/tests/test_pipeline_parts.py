@@ -130,3 +130,16 @@ def test_missing_config():
     with pytest.raises(PipelineError) as e:
         llm.structure_recipe({"caption": "x"}, QUELLE, cfg)
     assert e.value.code == "not_configured"
+
+
+def test_images_are_sent_to_claude_as_image_blocks():
+    seen = {}
+
+    class C(FakeClient):
+        def _create(self, **kw):
+            seen["content"] = kw["messages"][0]["content"]
+            return super()._create(**kw)
+
+    d = rezept_dict(); d.pop("quelle")
+    llm.structure_recipe({}, QUELLE, CFG, client=C([("speichere_rezept", d)]), images=[("image/png", b"abc")])
+    assert seen["content"][0]["type"] == "image" and seen["content"][-1]["type"] == "text"

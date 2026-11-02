@@ -26,26 +26,44 @@ def create_app(cfg: Settings, repo: RecipeRepo | None = None, manager: JobManage
         return {"ok": True}
 
     # ---- Jobs (Link -> Rezept-Entwurf) ----
+    async def _save_upload(f: UploadFile, limit: int) -> Path:
+        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=Path(f.filename or "x").suffix)
+        size = 0
+        while chunk := await f.read(1024 * 1024):
+            size += len(chunk)
+            if size > limit:
+                tmp.close()
+                Path(tmp.name).unlink(missing_ok=True)
+                raise HTTPException(413, "Die Datei ist zu groß.")
+            tmp.write(chunk)
+        tmp.close()
+        return Path(tmp.name)
+
     @app.post("/api/jobs")
-    async def create_job(link: str = Form(...), text: str = Form(""), video: UploadFile | None = File(None)):
-        upload_path = None
-        if video is not None:
-            limit = cfg.max_video_mb * 1024 * 1024
-            tmp = tempfile.NamedTemporaryFile(delete=False, suffix=Path(video.filename or "v.mp4").suffix)
-            size = 0
-            while chunk := await video.read(1024 * 1024):
-                size += len(chunk)
-                if size > limit:
-                    tmp.close()
-                    Path(tmp.name).unlink(missing_ok=True)
-                    raise HTTPException(413, "Das Video ist zu groß.")
-                tmp.write(chunk)
-            tmp.close()
-            upload_path = Path(tmp.name)
+    async def create_job(link: str = Form(...), text: str = Form(""), files: list[UploadFile] = File(default=[])):
+        """Fallback-Material: ein Video und/oder bis zu 8 Screenshots (Bilder)."""
+        video: Path | None = None
+        images: list[Path] = []
+        saved: list[Path] = []
         try:
-            job = manager.start(PipelineInput(link, text, upload_path))
+            for f in files:
+                ct = f.content_type or ""
+                if ct.startswith("video/") and video is None:
+                    video = await _save_upload(f, cfg.max_video_mb * 1024 * 1024)
+                    saved.append(video)
+                elif ct.startswith("image/") and len(images) < 8:
+                    img = await _save_upload(f, 8 * 1024 * 1024)
+                    images.append(img)
+                    saved.append(img)
+            job = manager.start(PipelineInput(link, text, video, images))
         except RateLimited:
+            for p in saved:
+                p.unlink(missing_ok=True)
             raise HTTPException(429, "Gopa braucht eine kleine Pause. Versuche es in einer Stunde wieder.")
+        except HTTPException:
+            for p in saved:
+                p.unlink(missing_ok=True)
+            raise
         return {"id": job.id}
 
     @app.get("/api/jobs/{job_id}")
