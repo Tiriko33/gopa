@@ -38,7 +38,6 @@ def download(url: str, workdir: Path, cfg: Settings) -> Downloaded:
         sys.executable, "-m", "yt_dlp",
         "--no-playlist", "--no-warnings", "--write-info-json",
         "--max-filesize", f"{cfg.max_video_mb}M",
-        "--match-filter", f"duration<={cfg.max_video_seconds} | !duration",
         "--socket-timeout", "20",
         "-f", "best[height<=720]/best",
         "-o", str(workdir / "video.%(ext)s"),
@@ -53,6 +52,15 @@ def download(url: str, workdir: Path, cfg: Settings) -> Downloaded:
     if info_file.exists():
         info = json.loads(info_file.read_text(encoding="utf-8"))
     video = next((p for p in workdir.glob("video.*") if p.suffix not in (".json", ".part")), None)
+    # Längenlimit selbst prüfen: yt-dlps --match-filter bricht bei TikTok mit einem Typfehler ab
+    try:
+        too_long = float(info.get("duration") or 0) > cfg.max_video_seconds
+    except (TypeError, ValueError):
+        too_long = False
+    if too_long:
+        if video:
+            video.unlink(missing_ok=True)
+        raise PipelineError("Das Video ist zu lang für Gopa.", "too_large")
     if proc.returncode != 0 and not info:
         err = (proc.stderr or "")[-400:]
         if "login" in err.lower() or "rate-limit" in err.lower() or "empty media response" in err.lower():
