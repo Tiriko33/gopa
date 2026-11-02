@@ -204,3 +204,32 @@ def test_ollama_needs_model_but_no_api_key():
     with pytest.raises(PipelineError) as e:
         llm.structure_recipe({"caption": "x"}, QUELLE, replace(OLLAMA_CFG, ollama_model=""))
     assert e.value.code == "not_configured"
+
+
+# --- Download: Längenlimit (Regression: --match-filter bricht bei TikTok ab) ---
+import json as _j
+import subprocess as _sp
+from app import sources as _src
+
+
+def _fake_run(duration):
+    def run(cmd, **kw):
+        assert "--match-filter" not in cmd
+        wd = Path(cmd[cmd.index("-o") + 1]).parent
+        (wd / "video.info.json").write_text(_j.dumps({"duration": duration, "description": "d", "uploader": "u"}))
+        (wd / "video.mp4").write_bytes(b"x")
+        return _sp.CompletedProcess(cmd, 0, "", "")
+    return run
+
+
+def test_download_rejects_too_long_video(tmp_path, monkeypatch):
+    monkeypatch.setattr(_src.subprocess, "run", _fake_run("900"))  # TikTok liefert Dauer teils als String
+    with pytest.raises(PipelineError) as e:
+        _src.download("https://www.tiktok.com/@a/video/1", tmp_path, CFG)
+    assert e.value.code == "too_large" and not (tmp_path / "video.mp4").exists()
+
+
+def test_download_accepts_short_video(tmp_path, monkeypatch):
+    monkeypatch.setattr(_src.subprocess, "run", _fake_run(30))
+    d = _src.download("https://www.tiktok.com/@a/video/1", tmp_path, CFG)
+    assert d.creator == "u" and d.video_path.name == "video.mp4"
