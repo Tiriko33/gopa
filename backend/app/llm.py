@@ -1,4 +1,6 @@
 """Schritt 4: Claude strukturiert die Texte zu einem deutschen Rezept (JSON per erzwungenem Tool-Aufruf)."""
+import base64
+
 from pydantic import ValidationError
 
 from .config import Settings
@@ -58,8 +60,21 @@ def postprocess(rezept: Rezept) -> tuple[Rezept, bool]:
     return rezept, converted_any
 
 
-def structure_recipe(texts: dict, source: dict, cfg: Settings, client=None) -> Rezept:
-    """texts: caption, transcript, ocr, title, manual. source: url, plattform, creator."""
+def _content(user: str, images: list[tuple[str, bytes]]) -> str | list[dict]:
+    if not images:
+        return user
+    blocks: list[dict] = [{"type": "image", "source": {"type": "base64", "media_type": mt,
+                                                         "data": base64.b64encode(raw).decode()}}
+                          for mt, raw in images]
+    blocks.append({"type": "text", "text": user or "Lies das Rezept aus den Bildern."})
+    return blocks
+
+
+def structure_recipe(texts: dict, source: dict, cfg: Settings, client=None,
+                     images: list[tuple[str, bytes]] | None = None) -> Rezept:
+    """texts: caption, transcript, ocr, title, manual. source: url, plattform, creator.
+    images: Screenshots (media_type, bytes) als Fallback, Claude liest sie direkt."""
+    images = images or []
     if not cfg.anthropic_api_key or not cfg.claude_model:
         raise PipelineError("Gopa ist nicht vollständig eingerichtet (API-Schlüssel oder Modell fehlt).",
                             "not_configured", fallback=False)
@@ -68,9 +83,9 @@ def structure_recipe(texts: dict, source: dict, cfg: Settings, client=None) -> R
         client = anthropic.Anthropic(api_key=cfg.anthropic_api_key, timeout=cfg.timeout_llm)
     user = build_user_message(texts.get("caption", ""), texts.get("transcript", ""), texts.get("ocr", ""),
                               texts.get("title"), texts.get("manual", ""))
-    if not user.strip():
+    if not user.strip() and not images:
         raise PipelineError("Gopa hat keinen Text gefunden, aus dem ein Rezept werden kann.", "no_text")
-    messages = [{"role": "user", "content": user}]
+    messages = [{"role": "user", "content": _content(user, images)}]
     last_error = ""
     for _attempt in range(2):
         try:

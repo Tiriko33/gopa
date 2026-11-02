@@ -94,3 +94,13 @@ def test_api_roundtrip(client):
 
 def test_api_rejects_invalid_recipe(client):
     assert client.post("/api/recipes", json={"titel": "x"}).status_code == 422
+
+
+def test_job_upload_images_accepted_and_invalid_link_reported(client):
+    r = client.post("/api/jobs", data={"link": "https://youtube.com/x"},
+                    files=[("files", ("a.png", b"\x89PNG", "image/png"))])
+    assert r.status_code == 200
+    import time
+    time.sleep(0.5)
+    job = client.get(f"/api/jobs/{r.json()['id']}").json()
+    assert job["status"] == "error" and job["error"]["code"] == "invalid_link"

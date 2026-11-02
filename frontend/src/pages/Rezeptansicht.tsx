@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { addRecipe, useShoppingList } from "../lib/shopping";
 import { api } from "../lib/api";
 import { formatAmount, formatTime, groupIngredients, scaleAmount, wasConverted } from "../lib/format";
 import { KATEGORIEN, type Kategorie, type Rezept } from "../lib/types";
@@ -13,6 +14,8 @@ export function Rezeptansicht() {
   const [fehler, setFehler] = useState<string | null>(null);
   const [portionen, setPortionen] = useState(2);
   const [versuch, setVersuch] = useState(0);
+  const nav = useNavigate();
+  const { update } = useShoppingList();
 
   useEffect(() => {
     let aktuell = true;
@@ -51,6 +54,9 @@ export function Rezeptansicht() {
       <header className="hero">
         <div className="hero-top">
           <Link to="/" className="round-btn" aria-label="Zurück zur Rezeptsammlung"><BackIcon size={22} stroke="#0B2A4A" width={2.4} /></Link>
+          <Link to={`/rezept/${r.id}/bearbeiten`} className="round-btn" aria-label="Rezept bearbeiten">
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B2A4A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z" /></svg>
+          </Link>
         </div>
         <div className="hero-row">
           <div className="hero-main">
@@ -127,7 +133,7 @@ export function Rezeptansicht() {
       </main>
 
       <div className="action-bar">
-        <Link to="/einkauf" className="btn btn-secondary">Zur Einkaufsliste</Link>
+        <button className="btn btn-secondary" onClick={() => { update((l) => addRecipe(l, r, portionen)); nav("/einkauf"); }}>Zur Einkaufsliste</button>
         <Link to={`/rezept/${r.id}/kochen`} className="btn btn-primary">Los geht's!</Link>
       </div>
     </>

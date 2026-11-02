@@ -1,6 +1,6 @@
 import shutil
 import tempfile
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
 
@@ -11,6 +11,8 @@ from .schema import Rezept
 from .sources import PipelineError
 from .urls import validate_link
 
+_MEDIA = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp"}
+
 Progress = Callable[[str], None]  # Schritt: "download" | "transcribe" | "translate"
 
 
@@ -19,6 +21,7 @@ class PipelineInput:
     url: str
     manual_text: str = ""
     upload_path: Path | None = None  # hochgeladenes Video (Fallback)
+    image_paths: list[Path] = field(default_factory=list)  # Screenshots (Fallback)
 
 
 def run_pipeline(inp: PipelineInput, cfg: Settings, progress: Progress = lambda s: None,
@@ -32,7 +35,7 @@ def run_pipeline(inp: PipelineInput, cfg: Settings, progress: Progress = lambda 
         try:
             dl = sources.download(url, workdir, cfg)
         except PipelineError:
-            if not (inp.manual_text.strip() or inp.upload_path):
+            if not (inp.manual_text.strip() or inp.upload_path or inp.image_paths):
                 raise
         video = inp.upload_path or dl.video_path
 
@@ -52,7 +55,8 @@ def run_pipeline(inp: PipelineInput, cfg: Settings, progress: Progress = lambda 
         progress("translate")
         texts = {"title": dl.title, "caption": dl.caption, "transcript": transcript,
                  "ocr": ocr, "manual": inp.manual_text}
+        images = [(_MEDIA.get(p.suffix.lower(), "image/jpeg"), p.read_bytes()) for p in inp.image_paths]
         return structure_recipe(texts, {"url": url, "plattform": plattform, "creator": dl.creator}, cfg,
-                                client=llm_client)
+                                client=llm_client, images=images)
     finally:
         shutil.rmtree(workdir, ignore_errors=True)  # 5. Video und Zwischendateien löschen

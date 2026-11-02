@@ -65,5 +65,6 @@ class JobManager:
                          "fallback": True}
             job.status = "error"
         finally:
-            if inp.upload_path:
-                inp.upload_path.unlink(missing_ok=True)
+            for f in [inp.upload_path, *inp.image_paths]:
+                if f:
+                    f.unlink(missing_ok=True)
