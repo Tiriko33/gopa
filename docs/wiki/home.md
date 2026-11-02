@@ -2,7 +2,7 @@
 
 Gopa ist eine private Rezept-App für Android. Du siehst ein Kochvideo auf TikTok oder Instagram, tippst auf **Teilen → Gopa**, und Gopa schreibt dir daraus ein **deutsches Rezept**: mit Zutaten, Schritten, Timern und umgerechneten Mengen. Den Link zum Original-Video behält Gopa bei jedem Rezept.
 
-**[Gopa für Android herunterladen (APK)](https://DEIN-NAME.gitlab.io/gopa/gopa.apk)**
+**[Gopa für Android herunterladen (APK)](https://DEIN-NAME.github.io/gopa/gopa.apk)**
 
 ## Was kann Gopa?
 
@@ -29,7 +29,7 @@ Der PC muss **nur beim Erstellen eines Rezepts** laufen, nicht dauerhaft. Danach
 
 ## Weiter
 
-- [Installation der App](installation)
-- [Gopas Küche auf dem PC einrichten](gopas-kueche)
-- [Benutzung](benutzung)
-- [Probleme lösen](probleme)
+- [Installation der App](Installation)
+- [Gopas Küche auf dem PC einrichten](Gopas-Kueche)
+- [Benutzung](Benutzung)
+- [Probleme lösen](Probleme)

@@ -1,0 +1,79 @@
+# Baut die Android-APK und veröffentlicht die Download-Seite (GitHub Pages).
+# Läuft bei jedem Push auf main. Bei einem Tag (z. B. v1.0.0) entsteht zusätzlich ein Release mit der APK.
+#
+# Einmalig einrichten: Repository → Settings → Pages → Source: "GitHub Actions".
+#   Startseite:  https://<dein-name>.github.io/gopa/
+#   Direkt-APK:  https://<dein-name>.github.io/gopa/gopa.apk
+name: Android-APK und Download-Seite
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write      # für das Release bei Tags
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: android-actions/setup-android@v3
+      - name: Oberfläche bauen und in das Android-Projekt kopieren
+        working-directory: frontend
+        run: |
+          npm ci
+          npm test
+          npm run build
+          npx cap sync android
+      - name: APK bauen (Debug mit festem Test-Zertifikat)
+        working-directory: frontend/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+      - name: APK und Seite zusammenstellen
+        run: |
+          mkdir -p site
+          cp docs/site/index.html site/index.html
+          cp docs/design/assets/gopa-bear.svg docs/design/assets/icon-192.png site/
+          cp frontend/android/app/build/outputs/apk/debug/app-debug.apk site/gopa.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gopa-apk
+          path: site/gopa.apk
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - name: Release mit APK (nur bei Tags)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: site/gopa.apk
+
+  deploy:
+    needs: apk
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

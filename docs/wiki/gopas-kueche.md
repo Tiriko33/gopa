@@ -6,7 +6,7 @@ Gopas Küche ist das Programm, das aus dem Link ein Rezept macht. Es läuft auf 
 
 - Windows-PC mit **mindestens 16 GB RAM**. Empfohlen: eine Grafikkarte mit 8 GB oder mehr (sonst läuft das Modell auf der CPU und ist langsamer).
 - **Python 3.12 oder neuer**, **ffmpeg** und **Ollama** ([ollama.com](https://ollama.com)).
-- Das Projekt (`git clone` oder ZIP von GitLab).
+- Das Projekt (`git clone` oder ZIP von GitHub).
 
 ## Einmalige Einrichtung
 
