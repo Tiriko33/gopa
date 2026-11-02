@@ -3,7 +3,7 @@
 ## "Gopa erreicht den Server nicht"
 
 - Läuft Gopas Küche? Starte `scripts\start-gopa.bat` auf dem PC.
-- Sind Handy und PC im **selben WLAN**? Sonst nutze Tailscale (siehe [Installation](installation)).
+- Sind Handy und PC im **selben WLAN**? Sonst nutze Tailscale (siehe [Installation](Installation)).
 - Stimmt die Adresse unter **Einstellungen**? Sie sieht aus wie `http://192.168.1.20:8000`. Die IP kann sich ändern, das Startskript zeigt die aktuelle.
 - Firewall: Beim ersten Start **Private Netzwerke erlauben**.
 - Test am Handy: Öffne `http://<PC-IP>:8000/api/health` im Browser. Du solltest `{"ok":true}` sehen.
